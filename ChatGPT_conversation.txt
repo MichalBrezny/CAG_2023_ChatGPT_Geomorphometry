@@ -1,0 +1,383 @@
+michal.brezny@outlook.com
+I have digital elevation model called dem.tif, calculate slope and ascpect raster and plot them. Use R language.
+To calculate slope and aspect raster from a digital elevation model (DEM) in R, you can use the terrain function from the raster package. Here's an example code:
+
+R
+Copy code
+library(raster)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Calculate slope and aspect rasters
+slope <- terrain(dem, opt = "slope")
+aspect <- terrain(dem, opt = "aspect")
+
+# Plot the slope raster
+plot(slope, main = "Slope")
+
+# Plot the aspect raster
+plot(aspect, main = "Aspect")
+This code will load the dem.tif file as a raster using the raster function. Then, it will calculate the slope and aspect rasters using the terrain function with the opt parameter set to "slope" and "aspect", respectively. Finally, it will plot the slope and aspect rasters using the plot function.
+
+Note that the resulting slope and aspect rasters will have the same extent and resolution as the input DEM raster.
+
+
+
+
+michal.brezny@outlook.com
+Calculate slope and aspect in degrees
+To calculate slope and aspect in degrees, you can set the unit parameter of the terrain function to "degrees". Here's an updated example code:
+
+R
+Copy code
+library(raster)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Calculate slope and aspect rasters in degrees
+slope <- terrain(dem, opt = "slope", unit = "degrees")
+aspect <- terrain(dem, opt = "aspect", unit = "degrees")
+
+# Plot the slope raster
+plot(slope, main = "Slope (degrees)")
+
+# Plot the aspect raster
+plot(aspect, main = "Aspect (degrees)")
+This code will calculate the slope and aspect rasters with the unit parameter set to "degrees", which will produce the output in degrees. Then, it will plot the slope and aspect rasters with the appropriate titles indicating that they are in degrees.
+
+
+
+
+michal.brezny@outlook.com
+Shapefile layer called landslides contains polygons of landslides. Write code in R which extract DEM values in the landslides and compare them with whole DEM using histogram.
+To extract DEM values within the landslide polygons and compare them with the whole DEM using a histogram in R, you can use the extract function from the raster package to extract the DEM values within the landslide polygons, and then use the hist function to create a histogram for the extracted values and for the whole DEM. Here's an example code:
+
+R
+Copy code
+library(raster)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Create a histogram of the extracted DEM values and the whole DEM
+hist(dem, breaks = "FD", main = "DEM Histogram")
+hist(dem_landslides, breaks = "FD", main = "Landslide DEM Histogram")
+This code will load the DEM raster and the landslide shapefile using the raster and shapefile functions, respectively. Then, it will extract the DEM values within the landslide polygons using the extract function and store them in the dem_landslides variable. Finally, it will create a histogram of the extracted DEM values and the whole DEM using the hist function, with the breaks parameter set to "FD" to use the Freedman-Diaconis rule for the number of bins, and with appropriate titles indicating that they are for the whole DEM and for the landslide DEM values, respectively.
+
+The resulting histograms will show the distribution of elevation values for the whole DEM and the extracted DEM values within the landslide polygons, which can be compared to see if there are any differences in the elevation distribution between the two.
+
+
+
+
+michal.brezny@outlook.com
+Extract function returned list of values thus hist function does not work.
+If the extract function returned a list of values instead of a vector, you can use the unlist function to convert the list to a vector before creating the histogram. Here's an updated example code:
+
+R
+Copy code
+library(raster)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Convert the list to a vector
+dem_landslides <- unlist(dem_landslides)
+
+# Create a histogram of the extracted DEM values and the whole DEM
+hist(dem, breaks = "FD", main = "DEM Histogram")
+hist(dem_landslides, breaks = "FD", main = "Landslide DEM Histogram")
+This code will load the DEM raster and the landslide shapefile using the raster and shapefile functions, respectively. Then, it will extract the DEM values within the landslide polygons using the extract function and store them in the dem_landslides variable. Since extract returns a list of values for each polygon, we need to convert it to a vector using the unlist function. Finally, it will create a histogram of the extracted DEM values and the whole DEM using the hist function with the breaks parameter set to "FD" to use the Freedman-Diaconis rule for the number of bins, and with appropriate titles indicating that they are for the whole DEM and for the landslide DEM values, respectively.
+
+The resulting histograms will show the distribution of elevation values for the whole DEM and the extracted DEM values within the landslide polygons, which can be compared to see if there are any differences in the elevation distribution between the two.
+
+
+
+
+michal.brezny@outlook.com
+For histogram use ggplot. Create one plot with two histograms.
+Sure! Here's an updated example code that uses ggplot2 to create a plot with two histograms:
+
+R
+Copy code
+library(raster)
+library(ggplot2)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Convert the list to a vector
+dem_landslides <- unlist(dem_landslides)
+
+# Create a data frame with the DEM values
+df_dem <- data.frame(value = getValues(dem), type = "DEM")
+df_landslides <- data.frame(value = dem_landslides, type = "Landslides")
+
+# Combine the data frames
+df <- rbind(df_dem, df_landslides)
+
+# Create a ggplot with two histograms
+ggplot(df, aes(x = value, fill = type)) +
+  geom_histogram(alpha = 0.5, bins = "FD") +
+  labs(title = "DEM and Landslide DEM Histograms", x = "Elevation", y = "Count") +
+  theme_bw()
+This code will load the DEM raster and the landslide shapefile using the raster and shapefile functions, respectively. Then, it will extract the DEM values within the landslide polygons using the extract function and store them in the dem_landslides variable. Since extract returns a list of values for each polygon, we need to convert it to a vector using the unlist function.
+
+Next, we create two data frames, df_dem and df_landslides, each with a value column containing the DEM values and a type column indicating whether they are from the whole DEM or the landslide DEM values. We then combine the two data frames using rbind to create a single data frame df.
+
+Finally, we create a ggplot with two histograms using ggplot2. We map the value variable to the x-axis, and the type variable to the fill aesthetic. We use geom_histogram to create the histograms, and set the alpha parameter to 0.5 to make the bars semi-transparent. We also set the bins parameter to "FD" to use the Freedman-Diaconis rule for the number of bins. We add appropriate titles and axis labels using labs, and set the theme to theme_bw() for a white background.
+
+The resulting plot will show the distribution of elevation values for the whole DEM and the extracted DEM values within the landslide polygons, with different colors indicating the source of the values.
+
+
+
+
+michal.brezny@outlook.com
+I get warning message: In bin_breaks_bins(scales[[x]]$dimension(), bins, center = center,  :
+  NAs introduced by coercion and Computation failed in `stat_bin()`:
+missing value where TRUE/FALSE needed 
+The warning message you received usually occurs when there are NA values in the data you are trying to plot. ggplot2 cannot plot NA values, so it may introduce NAs by coercion to try to remove them.
+
+One way to handle this issue is to remove the NA values before creating the histogram. You can use the na.omit function to remove rows that contain NA values in the value column of the df data frame. Here's an updated example code that includes this modification:
+
+R
+Copy code
+library(raster)
+library(ggplot2)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Convert the list to a vector
+dem_landslides <- unlist(dem_landslides)
+
+# Create a data frame with the DEM values
+df_dem <- data.frame(value = getValues(dem), type = "DEM")
+df_landslides <- data.frame(value = dem_landslides, type = "Landslides")
+
+# Combine the data frames
+df <- rbind(df_dem, df_landslides)
+
+# Remove rows with NA values
+df <- na.omit(df)
+
+# Create a ggplot with two histograms
+ggplot(df, aes(x = value, fill = type)) +
+  geom_histogram(alpha = 0.5, bins = "FD") +
+  labs(title = "DEM and Landslide DEM Histograms", x = "Elevation", y = "Count") +
+  theme_bw()
+In this modified code, we added the na.omit function to remove any rows in the df data frame that contain NA values in the value column.
+
+This should resolve the warning message you received and allow you to create the histogram plot.
+
+
+
+
+michal.brezny@outlook.com
+Still it does not work. NAs introduced by coercion.
+I apologize that my previous suggestion did not solve the issue. The NA values may still be present in the extracted DEM values within the landslide polygons.
+
+One way to handle NA values is to replace them with a value that is outside the range of the data. For example, you can use the setValues function to replace the NA values in the dem_landslides raster with a value of -9999, which is unlikely to occur in the actual data:
+
+R
+Copy code
+library(raster)
+library(ggplot2)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Convert the list to a raster
+dem_landslides_raster <- raster(dem_landslides)
+
+# Replace NA values with -9999
+dem_landslides_raster[is.na(dem_landslides_raster)] <- -9999
+
+# Create a data frame with the DEM values
+df_dem <- data.frame(value = getValues(dem), type = "DEM")
+df_landslides <- data.frame(value = getValues(dem_landslides_raster), type = "Landslides")
+
+# Combine the data frames
+df <- rbind(df_dem, df_landslides)
+
+# Create a ggplot with two histograms
+ggplot(df, aes(x = value, fill = type)) +
+  geom_histogram(alpha = 0.5, bins = "FD") +
+  labs(title = "DEM and Landslide DEM Histograms", x = "Elevation", y = "Count") +
+  theme_bw()
+In this modified code, we first convert the list of DEM values within the landslide polygons to a raster using the raster function. We then replace any NA values in the dem_landslides_raster raster with a value of -9999 using the bracket notation ([ ]) and the is.na function.
+
+We then create the data frame df and plot the two histograms as before.
+
+This should ensure that the NA values do not cause errors when creating the histogram plot.
+
+
+
+
+michal.brezny@outlook.com
+Modify this code:
+ggplot(df, aes(x = value, fill = type)) +
+  geom_histogram(alpha = 0.5, bins = "FD") +
+  labs(title = "DEM and Landslide DEM Histograms", x = "Elevation", y = "Count") +
+  theme_bw()
+
+to create histogram with bin size 10
+
+You can modify the geom_histogram function to specify the binwidth (bin size) instead of the number of bins. To set a bin size of 10, you can add the binwidth argument to the geom_histogram function like this:
+
+R
+Copy code
+ggplot(df, aes(x = value, fill = type)) +
+  geom_histogram(alpha = 0.5, binwidth = 10) +
+  labs(title = "DEM and Landslide DEM Histograms", x = "Elevation", y = "Count") +
+  theme_bw()
+In this modified code, the binwidth argument is set to 10, which will create bins of width 10.
+
+This should create a histogram plot with a bin size of 10.
+
+
+
+
+michal.brezny@outlook.com
+Are values datasets significantly different?
+To determine if the two datasets (df_dem and df_landslides) are significantly different, you can perform a hypothesis test using a statistical test such as the two-sample t-test.
+
+The null hypothesis for the two-sample t-test is that the means of the two populations are equal. If the p-value is less than the significance level (usually 0.05), then we reject the null hypothesis and conclude that the means of the two populations are significantly different.
+
+Here's an example code to perform a two-sample t-test in R:
+
+R
+Copy code
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Calculate the mean elevation for each dataset
+mean_dem <- mean(getValues(dem))
+mean_landslides <- mean(getValues(raster(dem_landslides)))
+
+# Perform a two-sample t-test
+t.test(getValues(dem), getValues(raster(dem_landslides)), alternative = "two.sided", var.equal = FALSE)
+In this example code, we first extract the DEM values within the landslide polygons as before. We then calculate the mean elevation for each dataset using the mean function and the getValues function.
+
+We then perform the two-sample t-test using the t.test function. The alternative argument is set to "two.sided" to test for a difference in means in either direction. The var.equal argument is set to FALSE to assume unequal variances between the two datasets.
+
+The output of the t.test function will include the p-value of the test. If the p-value is less than the significance level (usually 0.05), then we can conclude that the means of the two populations are significantly different.
+
+Note that this test assumes that the two datasets are normally distributed and have equal variances. If these assumptions are not met, a different test may be needed.
+
+
+
+
+michal.brezny@outlook.com
+Why getValues function is used?
+The getValues function is used to extract the cell values of a raster layer as a vector in R.
+
+In this context, getValues(dem) is used to extract all of the cell values from the entire DEM raster layer. This vector of values is then used to calculate the mean elevation of the entire DEM, which is compared to the mean elevation of the DEM values within the landslide polygons.
+
+Similarly, getValues(raster(dem_landslides)) is used to extract the cell values of the DEM raster layer that correspond to the cells within the landslide polygons. This vector of values is used to calculate the mean elevation of the DEM values within the landslide polygons, which is compared to the mean elevation of the entire DEM.
+
+By using getValues, we can easily extract the cell values of a raster layer as a vector in R and perform calculations or analysis on those values.
+
+
+
+
+michal.brezny@outlook.com
+Extract function creates list not a raster. Get values are not usefull.
+You are correct that when extracting values from a raster using the extract function with a polygon shapefile, the output is a list and not a raster. My apologies for the confusion.
+
+In that case, you can use the unlist function to convert the list of extracted values to a vector that can be used in the two-sample t-test. Here's an example code that modifies the previous example to use unlist:
+
+R
+Copy code
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- shapefile("landslides.shp")
+
+# Extract DEM values within the landslide polygons
+dem_landslides <- extract(dem, landslides)
+
+# Convert the list of extracted values to a vector
+values_landslides <- unlist(dem_landslides)
+
+# Calculate the mean elevation for each dataset
+mean_dem <- mean(getValues(dem))
+mean_landslides <- mean(values_landslides)
+
+# Perform a two-sample t-test
+t.test(getValues(dem), values_landslides, alternative = "two.sided", var.equal = FALSE)
+In this modified code, we first extract the DEM values within the landslide polygons as a list using the extract function. We then convert the list of extracted values to a vector using the unlist function.
+
+We then calculate the mean elevation for each dataset as before, but use values_landslides instead of getValues(raster(dem_landslides)) to get the mean elevation of the DEM values within the landslide polygons.
+
+Finally, we perform the two-sample t-test as before using getValues(dem) and values_landslides.
+
+
+
+
+michal.brezny@outlook.com
+Find max values for each landslide and plot histogram.
+To find the maximum elevation value within each landslide polygon and plot a histogram of these values, you can use the extract function to extract the maximum elevation value from each polygon and then plot a histogram of these values using ggplot2. Here's an example code:
+
+R
+Copy code
+library(raster)
+library(rgdal)
+library(ggplot2)
+
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- readOGR("landslides.shp")
+
+# Extract the maximum elevation value within each landslide polygon
+max_values <- sapply(extract(dem, landslides, fun = max), max)
+
+# Plot a histogram of the maximum elevation values
+ggplot(data = data.frame(max_values), aes(x = max_values)) + 
+  geom_histogram(binwidth = 10, fill = "dodgerblue", color = "black") + 
+  labs(title = "Maximum Elevation Values within Landslide Polygons", 
+       x = "Maximum Elevation Value", y = "Count") + 
+  theme_bw()
+In this code, we first use the extract function with the fun = max argument to extract the maximum elevation value within each landslide polygon. The sapply function is used to extract the maximum value from each list of extracted values and store them as a vector called max_values.
+
+We then plot a histogram of the maximum elevation values using ggplot2. The data.frame function is used to create a data frame with max_values as a single column. We then use aes to specify that we want to plot the max_values column on the x-axis. The geom_histogram function is used to create a histogram with a bin width of 10, and the fill and color arguments are used to specify the fill and border colors of the bars in the histogram. Finally, we use labs and theme_bw to add a title and adjust the theme of the plot.
