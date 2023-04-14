@@ -127,8 +127,31 @@ ggplot(data = data.frame(max_values), aes(x = max_values)) +
   theme_bw()
 
 
+#############################################################
+#Create points max elevation
+#############################################################
 
+library(raster)
+library(rgdal)
+library(sp)
 
+# Load the DEM raster
+dem <- raster("dem.tif")
+
+# Load the landslide shapefile
+landslides <- readOGR("landslides.shp")
+
+# Extract the maximum elevation value and coordinates within each landslide polygon
+max_values <- extract(dem, landslides, fun = max, sp = TRUE)
+coords <- max_values[,1:2]
+elevations <- max_values[,3]
+
+# Create a new spatial points data frame with the maximum elevation values and coordinates
+points_df <- SpatialPointsDataFrame(coords, data.frame(elevation = elevations))
+
+# Plot the points on top of the DEM raster
+plot(dem)
+points(points_df, pch = 19, col = "red")
 
 
 
